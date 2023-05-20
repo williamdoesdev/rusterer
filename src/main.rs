@@ -1,4 +1,5 @@
 use glow::*;
+use std::fs;
 
 mod context;
 
@@ -8,7 +9,9 @@ fn main() {
         let (gl, window, mut events_loop, _context) = context::create_sdl2_context();
 
         // Create a shader program from source
-        let program = create_program(&gl, VERTEX_SHADER_SOURCE, FRAGMENT_SHADER_SOURCE);
+        let program = create_program(&gl, 
+            &fs::read_to_string("res/shaders/triangle.vert.glsl").expect("Should be able to read file"), 
+            &fs::read_to_string("res/shaders/triangle.frag.glsl").expect("Should be able to read file"));
         gl.use_program(Some(program));
 
         // Create a vertex buffer and vertex array object
@@ -77,10 +80,11 @@ unsafe fn create_program(
         gl.delete_shader(shader);
     }
 
-    program
+    return program
 }
 
 unsafe fn create_vertex_buffer(gl: &glow::Context) -> (NativeBuffer, NativeVertexArray) {
+
     // This is a flat array of f32s that are to be interpreted as vec2s.
     let triangle_vertices = [0.5f32, 1.0f32, 0.0f32, 0.0f32, 1.0f32, 0.0f32];
     let triangle_vertices_u8: &[u8] = core::slice::from_raw_parts(
@@ -99,27 +103,11 @@ unsafe fn create_vertex_buffer(gl: &glow::Context) -> (NativeBuffer, NativeVerte
     gl.enable_vertex_attrib_array(0);
     gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
 
-    (vbo, vao)
+    return (vbo, vao)
 }
 
 unsafe fn set_uniform(gl: &glow::Context, program: NativeProgram, name: &str, value: f32) {
     let uniform_location = gl.get_uniform_location(program, name);
     // See also `uniform_n_i32`, `uniform_n_u32`, `uniform_matrix_4_f32_slice` etc.
-    gl.uniform_1_f32(uniform_location.as_ref(), value)
+    return gl.uniform_1_f32(uniform_location.as_ref(), value)
 }
-
-const VERTEX_SHADER_SOURCE: &str = r#"#version 330
-  in vec2 in_position;
-  out vec2 position;
-  void main() {
-    position = in_position;
-    gl_Position = vec4(in_position - 0.5, 0.0, 1.0);
-  }"#;
-const FRAGMENT_SHADER_SOURCE: &str = r#"#version 330
-  precision mediump float;
-  in vec2 position;
-  out vec4 color;
-  uniform float blue;
-  void main() {
-    color = vec4(position, blue, 1.0);
-  }"#;
