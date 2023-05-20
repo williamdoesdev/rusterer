@@ -16,6 +16,7 @@ fn main() {
 
         // Create a vertex buffer and vertex array object
         let (vbo, vao) = create_vertex_buffer(&gl);
+        let ibo = create_index_buffer(&gl);
 
         // Upload some uniforms
         set_uniform(&gl, program, "blue", 0.8);
@@ -32,14 +33,16 @@ fn main() {
             }
 
             gl.clear(glow::COLOR_BUFFER_BIT);
-            gl.draw_arrays(glow::TRIANGLES, 0, 3);
+            gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
+            // gl.draw_arrays(glow::TRIANGLES, 0, 6);
             window.gl_swap_window();
         }
 
         // Clean up
         gl.delete_program(program);
         gl.delete_vertex_array(vao);
-        gl.delete_buffer(vbo)
+        gl.delete_buffer(vbo);
+        gl.delete_buffer(ibo);
     }
 }
 
@@ -86,16 +89,21 @@ unsafe fn create_program(
 unsafe fn create_vertex_buffer(gl: &glow::Context) -> (NativeBuffer, NativeVertexArray) {
 
     // This is a flat array of f32s that are to be interpreted as vec2s.
-    let triangle_vertices = [0.5f32, 1.0f32, 0.0f32, 0.0f32, 1.0f32, 0.0f32];
-    let triangle_vertices_u8: &[u8] = core::slice::from_raw_parts(
-        triangle_vertices.as_ptr() as *const u8,
-        triangle_vertices.len() * core::mem::size_of::<f32>(),
+    let square_vertices = [
+        -0.5f32, -0.5f32, 
+        -0.5f32, 0.5f32, 
+        0.5f32, -0.5f32,
+        0.5f32, 0.5f32
+        ];
+    let square_vertices_u8: &[u8] = core::slice::from_raw_parts(
+        square_vertices.as_ptr() as *const u8,
+        square_vertices.len() * core::mem::size_of::<f32>()
     );
 
     // We construct a buffer and upload the data
     let vbo = gl.create_buffer().unwrap();
     gl.bind_buffer(glow::ARRAY_BUFFER, Some(vbo));
-    gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, triangle_vertices_u8, glow::STATIC_DRAW);
+    gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, square_vertices_u8, glow::STATIC_DRAW);
 
     // We now construct a vertex array to describe the format of the input buffer
     let vao = gl.create_vertex_array().unwrap();
@@ -104,6 +112,25 @@ unsafe fn create_vertex_buffer(gl: &glow::Context) -> (NativeBuffer, NativeVerte
     gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
 
     return (vbo, vao)
+}
+
+unsafe fn create_index_buffer(gl: &glow::Context) -> NativeBuffer {
+
+    let square_indeces = [
+        0, 1, 2,
+        1, 2, 3
+    ];
+
+    let square_indeces_u8: &[u8] = core::slice::from_raw_parts(
+        square_indeces.as_ptr() as *const u8,
+        square_indeces.len() * core::mem::size_of::<f32>()
+    );
+
+    let ibo = gl.create_buffer().unwrap();
+    gl.bind_buffer(glow::ELEMENT_ARRAY_BUFFER, Some(ibo));
+    gl.buffer_data_u8_slice(glow::ELEMENT_ARRAY_BUFFER, square_indeces_u8, glow::STATIC_DRAW);
+
+    return ibo
 }
 
 unsafe fn set_uniform(gl: &glow::Context, program: NativeProgram, name: &str, value: f32) {
