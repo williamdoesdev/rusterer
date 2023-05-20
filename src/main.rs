@@ -77,9 +77,9 @@ fn main() {
 
     // Vertex buffer
     let positions = [
-        -0.5, -0.5,
-        0.0, -0.5,
-        0.5, -0.5,
+    -0.5, -0.5, 0.0, 1.0,
+     0.0,  0.5, 0.0, 1.0,
+     0.5, -0.5, 0.0, 1.0,
     ];
 
     let mut vertex_buffer: u32 = 0;
@@ -95,10 +95,10 @@ fn main() {
 
         gl::VertexAttribPointer(
             0, // index
-            2, // size (number of components or array dimensions, not the actual size in bytes)
+            4, // size (number of components)
             gl::FLOAT, // type
             gl::FALSE, // whether or not to normalize the data
-            (size_of::<f32>() * 2) as i32, // stride between vertices
+            (size_of::<f32>() * 4) as i32, // stride between vertices
             std::ptr::null() // Offset of the attribute in the vertex
         );
         gl::EnableVertexAttribArray(0);
@@ -131,9 +131,14 @@ fn main() {
     unsafe {
         gl::UseProgram(shader);
     }
-
+    
     // Loop until the user closes the window
     while !window.should_close() {
+        // Set viewport size
+        unsafe{
+            let (width, height) = window.get_size();
+            gl::Viewport(0, 0, width, height);
+        }
         // Clear the screen
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
