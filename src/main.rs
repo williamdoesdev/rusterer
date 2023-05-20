@@ -7,6 +7,7 @@ fn main() {
     unsafe {
         // Create a context from a sdl2 window
         let (gl, window, mut events_loop, _context) = context::create_sdl2_context();
+        
 
         // Create a shader program from source
         let program = create_program(&gl, 
@@ -18,10 +19,14 @@ fn main() {
         let (vbo, vao) = create_vertex_buffer(&gl);
         let ibo = create_index_buffer(&gl);
 
-        // Upload some uniforms
-        set_uniform(&gl, program, "blue", 0.8);
-
         gl.clear_color(0.1, 0.2, 0.3, 1.0);
+
+        // Set color uniform
+        let u_color_location = gl.get_uniform_location(program, "uColor");
+        gl.uniform_4_f32_slice(u_color_location.as_ref(), &[1.0, 1.0, 0.0, 1.0]);
+
+        let mut green_channel: f32 = 0.0;
+        let mut increment: f32 = 0.005;
 
         'render: loop {
             {
@@ -31,6 +36,17 @@ fn main() {
                     }
                 }
             }
+
+            if(green_channel > 1.0){
+                increment = -0.005;
+            } else if (green_channel < 0.0){
+                increment = 0.005;
+            } 
+
+            green_channel += increment;
+
+            let u_color_location = gl.get_uniform_location(program, "uColor");
+            gl.uniform_4_f32_slice(u_color_location.as_ref(), &[0.25, green_channel, 1.0, 1.0]);
 
             gl.clear(glow::COLOR_BUFFER_BIT);
             gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
