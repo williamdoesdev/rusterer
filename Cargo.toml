@@ -10,3 +10,9 @@ version = "*"
 
 [dependencies.sdl2]
 version = "*"
+
+[dependencies.log]
+version = "*"
+
+[dependencies.env_logger]
+version = "*"

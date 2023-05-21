@@ -1,21 +1,27 @@
 use glow::*;
 use std::fs;
+use log::info;
 
 mod context;
+mod vertex_buffer;
+mod index_buffer;
 
 fn main() {
+    env_logger::init();
+
     unsafe {
         // Create a context from a sdl2 window
         let (gl, window, mut events_loop, _context) = context::create_sdl2_context();
         
-
         // Create a shader program from source
+        info!("Compiling shader program...");
         let program = create_program(&gl, 
             &fs::read_to_string("res/shaders/triangle.vert.glsl").expect("Should be able to read file"), 
             &fs::read_to_string("res/shaders/triangle.frag.glsl").expect("Should be able to read file"));
         gl.use_program(Some(program));
 
         // Create a vertex buffer and vertex array object
+        info!("Creating vbo and vao...");
         let (vbo, vao) = create_vertex_buffer(&gl);
         let ibo = create_index_buffer(&gl);
 
@@ -28,6 +34,7 @@ fn main() {
         let mut green_channel: f32 = 0.0;
         let mut increment: f32 = 0.005;
 
+        info!("Starting render loop...");
         'render: loop {
             {
                 for event in events_loop.poll_iter() {
@@ -149,8 +156,8 @@ unsafe fn create_index_buffer(gl: &glow::Context) -> NativeBuffer {
     return ibo
 }
 
-unsafe fn set_uniform(gl: &glow::Context, program: NativeProgram, name: &str, value: f32) {
-    let uniform_location = gl.get_uniform_location(program, name);
-    // See also `uniform_n_i32`, `uniform_n_u32`, `uniform_matrix_4_f32_slice` etc.
-    return gl.uniform_1_f32(uniform_location.as_ref(), value)
-}
+// unsafe fn set_uniform(gl: &glow::Context, program: NativeProgram, name: &str, value: f32) {
+//     let uniform_location = gl.get_uniform_location(program, name);
+//     // See also `uniform_n_i32`, `uniform_n_u32`, `uniform_matrix_4_f32_slice` etc.
+//     return gl.uniform_1_f32(uniform_location.as_ref(), value)
+// }
