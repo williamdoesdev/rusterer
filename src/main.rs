@@ -36,21 +36,20 @@ fn main() {
         0.5f32, 0.5f32
         ];
 
+        // Create vb
         let vb = VertexBuffer::new(&gl, &square_positions);
 
-        // let vao = gl.create_vertex_array().unwrap();
-        // gl.bind_vertex_array(Some(vao));
-        // gl.enable_vertex_attrib_array(0);
-        // gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
-
+        // Create va
         let mut va = vertex_array::VertexArray::new(&gl);
+
+        // Create layout
         let mut layout = VertexLayout::new(None);
         layout.push::<f32>(2);
-        
+
+        // Add buffer to va
         va.add_buffer(&vb, &layout);
 
-        
-
+        // Index buffer
         let square_indices = [
         0, 1, 2,
         1, 2, 3
