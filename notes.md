@@ -1,10 +1,10 @@
 # Vertex Array Object Layout
-
-<span style="color:mediumpurple">┌────── Vertex 1 ─────┐</span><span style="color:orange">┌────── Vertex 2 ─────┐</span>\
-<span style="color:lightblue">▊▊ Attrib 1 ▊▊</span><span style="color:lightgreen">▊▊ Attrib 2 ▊▊</span><span style="color:salmon">▊▊ Attrib 1 ▊▊</span><span style="color:peachpuff">▊▊ Attrib 2 ▊▊</span>\
-└─ Index 1 ─┘└─ Index 2 ──┘└─ Index 1 ─┘└─ Index 2 ──┘\
-└────── Stride ──────┘└────── Stride ──────┘
-
+```
+┌──────── Vertex 1 ────────┐┌──────── Vertex 2 ────────┐
+▊▊ Attrib 1 ▊▊▊▊ Attrib 2 ▊▊▊▊ Attrib 1 ▊▊▊▊ Attrib 2 ▊▊
+└─ Index 1 ──┘└─ Index 2 ──┘└─ Index 1 ──┘└─ Index 2 ──┘
+└───────── Stride ─────────┘└───────── Stride ─────────┘
+```
 <b>Index</b>: The index of an attribute within a vertex
 
 <b>Size</b>: The number of components for an attribute. i.e. a 2D coordinate would have a size of 2

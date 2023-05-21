@@ -6,9 +6,12 @@ mod context;
 mod vertex_buffer;
 mod index_buffer;
 mod vertex_array;
+mod vertex_layout;
 
 use vertex_buffer::*;
 use index_buffer::*;
+use vertex_array::*;
+use vertex_layout::*;
 
 fn main() {
     env_logger::init();
@@ -35,10 +38,18 @@ fn main() {
 
         let vb = VertexBuffer::new(&gl, &square_positions);
 
-        let vao = gl.create_vertex_array().unwrap();
-        gl.bind_vertex_array(Some(vao));
-        gl.enable_vertex_attrib_array(0);
-        gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
+        // let vao = gl.create_vertex_array().unwrap();
+        // gl.bind_vertex_array(Some(vao));
+        // gl.enable_vertex_attrib_array(0);
+        // gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
+
+        let mut va = vertex_array::VertexArray::new(&gl);
+        let mut layout = VertexLayout::new(None);
+        layout.push::<f32>(2);
+        
+        va.add_buffer(&vb, &layout);
+
+        
 
         let square_indices = [
         0, 1, 2,
@@ -85,7 +96,7 @@ fn main() {
 
         // Clean up
         gl.delete_program(program);
-        gl.delete_vertex_array(vao);
+        // gl.delete_vertex_array(vao);
     }
 }
 
