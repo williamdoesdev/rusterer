@@ -1,7 +1,7 @@
 use glow::*;
 use log::info;
 
-pub unsafe fn create_sdl2_context() -> (
+pub unsafe fn create_sdl2_context(window_title: &str) -> (
     glow::Context,
     sdl2::video::Window,
     sdl2::EventPump,
@@ -16,7 +16,7 @@ pub unsafe fn create_sdl2_context() -> (
     gl_attr.set_context_flags().forward_compatible().set();
     info!("Creating window...");
     let window = video
-        .window("Hello triangle!", 1024, 769)
+        .window(window_title, 1024, 769)
         .opengl()
         .resizable()
         .build()
