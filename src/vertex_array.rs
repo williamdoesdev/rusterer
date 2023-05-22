@@ -27,6 +27,10 @@ impl<'a> VertexArray<'a> {
             self.gl.vertex_attrib_pointer_f32(i, element.components, element.dtype, element.normalized, layout.stride, element.ptr);
         }
     }
+
+    pub unsafe fn bind(&mut self) {
+        self.gl.bind_vertex_array(self.vao);
+    }
 }
 
 impl<'a> Drop for VertexArray<'a> {

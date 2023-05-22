@@ -3,7 +3,7 @@ use glow::*;
 
 pub struct IndexBuffer<'a> {
     gl: &'a glow::Context,
-    data: &'a [u32],
+    pub data: &'a [u32],
     ibo: Option<glow::NativeBuffer>,
 }
 

@@ -10,12 +10,14 @@ mod index_buffer;
 mod vertex_array;
 mod vertex_layout;
 mod shader;
+mod renderer;
 
 use vertex_buffer::*;
 use index_buffer::*;
 use vertex_array::*;
 use vertex_layout::*;
 use shader::*;
+use renderer::*;
 
 fn main() {
     env_logger::init();
@@ -53,15 +55,13 @@ fn main() {
 
         // Add buffer to va
         va.add_buffer(&vb, &layout);
-
         // Index buffer
         let square_indices = [
         0, 1, 2,
         1, 2, 3
         ];
 
-        let ib = IndexBuffer::new(&gl, &square_indices);
-
+        let mut ib = IndexBuffer::new(&gl, &square_indices);
         gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
         // Set color uniform
@@ -71,6 +71,8 @@ fn main() {
 
         let mut green_channel: f32 = 0.0;
         let mut increment: f32 = 0.005;
+
+        let mut renderer = Renderer::new(&gl);
 
         info!("Starting render loop...");
         'render: loop {
@@ -94,9 +96,11 @@ fn main() {
             // let u_color_location = gl.get_uniform_location(program, "uColor");
             // gl.uniform_4_f32_slice(u_color_location.as_ref(), &[0.25, green_channel, 1.0, 1.0]);
 
-            gl.clear(glow::COLOR_BUFFER_BIT);
-            gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
-            // gl.draw_arrays(glow::TRIANGLES, 0, 6);
+            renderer.draw(&mut va, &mut ib, &mut program);
+
+            // gl.clear(glow::COLOR_BUFFER_BIT);
+            // gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
+
             window.gl_swap_window();
         }
     }
