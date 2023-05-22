@@ -7,6 +7,8 @@ impl VertexLayout {
     pub fn new(attributes: Option<Vec<LayoutAttribute>>) -> Self {
         match attributes {
             Some(attrs) => {
+                // TODO: this should be the # of components * the size of whatever the actual type is, not just a hardcoded u32.
+                // Maybe just add an argument for stride. I'm just gonna not use new() for now ¯\_(ツ)_/¯
                 let stride = attrs.iter().map(|attr| attr.components * std::mem::size_of::<u32>() as i32).sum();
                 VertexLayout {
                     attributes: attrs,
