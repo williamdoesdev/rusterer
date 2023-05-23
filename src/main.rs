@@ -1,107 +1,79 @@
-#![allow(unused)]
+use::std::fs;
+use::glow::*;
 
-use glow::*;
-use std::fs;
-use log::info;
-
-mod context;
+mod sdl2_context;
+use sdl2_context::*;
+mod shader_program;
+use shader_program::*;
 mod vertex_buffer;
-mod index_buffer;
-mod vertex_array;
-mod vertex_layout;
-mod shader;
-mod renderer;
-
 use vertex_buffer::*;
-use index_buffer::*;
-use vertex_array::*;
-use vertex_layout::*;
-use shader::*;
-use renderer::*;
 
 fn main() {
-    env_logger::init();
-
     unsafe {
-        // Create a context from a sdl2 window
-        let (gl, window, mut events_loop, _context) = context::create_sdl2_context("Rusterer");
-        
-        // Create a shader program from source
-        info!("Creating shader program...");
-        let mut program = ShaderProgram::new(&gl);
-        program.compile_shader("res/shaders/triangle.vert.glsl", glow::VERTEX_SHADER);
-        program.compile_shader("res/shaders/triangle.frag.glsl", glow::FRAGMENT_SHADER);
-        program.bind();
 
-        // Create a vertex buffer and vertex array object
-        info!("Creating vbo and vao...");
-        let square_positions = [
-        -0.5f32, -0.5f32,
-        -0.5f32, 0.5f32,
-        0.5f32, -0.5f32,
-        0.5f32, 0.5f32
-        ];
+    let (gl, window, mut events_loop, _context) = create_sdl2_context();
 
-        // Create vb
-        let vb = VertexBuffer::new(&gl, &square_positions);
+    let shaders = vec![
+    ("res/shaders/triangle.vert.glsl", glow::VERTEX_SHADER),
+    ("res/shaders/triangle.frag.glsl", glow::FRAGMENT_SHADER),
+    ];
 
-        // Create va
-        // TODO: Rename this, it conflicts with another struct in glow
-        let mut va = vertex_array::VertexArray::new(&gl);
+    let program = NativeProgram::new_from_files(&gl, shaders);
+    program.bind(&gl);
 
-        // Create layout
-        let mut layout = VertexLayout::new(None);
-        layout.push::<f32>(2);
+    // Create a vertex buffer and vertex array object
+    let (vbo, vao) = create_vertex_buffer(&gl);
 
-        // Add buffer to va
-        va.add_buffer(&vb, &layout);
-        // Index buffer
-        let square_indices = [
-        0, 1, 2,
-        1, 2, 3
-        ];
+    // Upload some uniforms
+    set_uniform(&gl, program, "blue", 0.8);
 
-        let mut ib = IndexBuffer::new(&gl, &square_indices);
-        gl.clear_color(0.1, 0.2, 0.3, 1.0);
+    gl.clear_color(0.1, 0.2, 0.3, 1.0);
 
-        // Set color uniform
-        program.set_uniform("uColor", &[1.0, 1.0, 0.0, 1.0]);
-        // let u_color_location = gl.get_uniform_location(program, "uColor");
-        // gl.uniform_4_f32_slice(u_color_location.as_ref(), &[1.0, 1.0, 0.0, 1.0]);
-
-        let mut green_channel: f32 = 0.0;
-        let mut increment: f32 = 0.005;
-
-        let mut renderer = Renderer::new(&gl);
-
-        info!("Starting render loop...");
-        'render: loop {
-            {
-                for event in events_loop.poll_iter() {
-                    if let sdl2::event::Event::Quit { .. } = event {
-                        break 'render;
-                    }
+    'render: loop {
+        {
+            for event in events_loop.poll_iter() {
+                if let sdl2::event::Event::Quit { .. } = event {
+                    break 'render;
                 }
             }
-
-            if(green_channel > 1.0){
-                increment = -0.005;
-            } else if (green_channel < 0.0){
-                increment = 0.005;
-            } 
-
-            green_channel += increment;
-
-            program.set_uniform("uColor", &[0.25, green_channel, 1.0, 1.0]);
-            // let u_color_location = gl.get_uniform_location(program, "uColor");
-            // gl.uniform_4_f32_slice(u_color_location.as_ref(), &[0.25, green_channel, 1.0, 1.0]);
-
-            renderer.draw(&mut va, &mut ib, &mut program);
-
-            // gl.clear(glow::COLOR_BUFFER_BIT);
-            // gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
-
-            window.gl_swap_window();
         }
+
+        gl.clear(glow::COLOR_BUFFER_BIT);
+        gl.draw_arrays(glow::TRIANGLES, 0, 3);
+        window.gl_swap_window();
     }
+
+    // Clean up
+    gl.delete_program(program);
+    gl.delete_vertex_array(vao);
+    gl.delete_buffer(vbo)
+    }
+}
+
+unsafe fn create_vertex_buffer(gl: &glow::Context) -> (NativeBuffer, NativeVertexArray) {
+    // This is a flat array of f32s that are to be interpreted as vec2s.
+    let triangle_vertices = [0.5f32, 1.0f32, 0.0f32, 0.0f32, 1.0f32, 0.0f32];
+    let triangle_vertices_u8: &[u8] = core::slice::from_raw_parts(
+        triangle_vertices.as_ptr() as *const u8,
+        triangle_vertices.len() * core::mem::size_of::<f32>(),
+    );
+
+    // We construct a buffer and upload the data
+    let vbo = gl.create_buffer().unwrap();
+    gl.bind_buffer(glow::ARRAY_BUFFER, Some(vbo));
+    gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, triangle_vertices_u8, glow::STATIC_DRAW);
+
+    // We now construct a vertex array to describe the format of the input buffer
+    let vao = gl.create_vertex_array().unwrap();
+    gl.bind_vertex_array(Some(vao));
+    gl.enable_vertex_attrib_array(0);
+    gl.vertex_attrib_pointer_f32(0, 2, glow::FLOAT, false, 8, 0);
+
+    (vbo, vao)
+}
+
+unsafe fn set_uniform(gl: &glow::Context, program: NativeProgram, name: &str, value: f32) {
+    let uniform_location = gl.get_uniform_location(program, name);
+    // See also `uniform_n_i32`, `uniform_n_u32`, `uniform_matrix_4_f32_slice` etc.
+    gl.uniform_1_f32(uniform_location.as_ref(), value)
 }

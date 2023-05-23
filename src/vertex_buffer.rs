@@ -1,53 +1,36 @@
 use glow::*;
-use log::*;
+use std::mem;
 
-pub struct VertexBuffer<'a, T> {
-    gl: &'a glow::Context,
-    data: &'a [T],
-    vbo: Option<glow::NativeBuffer>,
+pub trait CreateFromData<T> {
+    fn new(gl: &glow::Context, data: &[T]) -> Self;
 }
 
-impl<'a, T: Copy + 'a> VertexBuffer<'a, T> {
-    pub unsafe fn new(gl: &'a glow::Context, data: &'a [T]) -> Self {
-        info!("Creating and binding vertex buffer...");
-
-        //Make and bind buffer
-        let vbo = gl.create_buffer().unwrap();
-        gl.bind_buffer(glow::ARRAY_BUFFER, Some(vbo));
-
-        // Convert data to u8 slice
-        let len = data.len() * std::mem::size_of::<T>();
-        let data_ptr = data.as_ptr() as *const u8;
-        let data_u8_slice = std::slice::from_raw_parts(data_ptr, len);
-
-        // Send to buffer
-        gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, data_u8_slice, glow::STATIC_DRAW);
-
-        return VertexBuffer {
-            gl,
-            data,
-            vbo: Some(vbo),
-        }
-    }
-
-    pub unsafe fn bind(&self) {
-        self.gl.bind_buffer(glow::ARRAY_BUFFER, self.vbo);
-    }
-
-    pub unsafe fn unbind(&self) {
-        self.gl.bind_buffer(glow::ARRAY_BUFFER, None);
-    }
-
-}
-
-impl<'a, T> Drop for VertexBuffer<'a, T> {
-    fn drop(&mut self) {
-        info!("Dropping vertex buffer...");
-
+impl<T: Copy> CreateFromData<T> for NativeBuffer {
+    fn new(gl: &glow::Context, data: &[T]) -> Self {
+        // First, we need to get a pointer to the raw bytes of the data.
         unsafe {
-            if let Some(vbo) = self.vbo.take() {
-                self.gl.delete_buffer(vbo);
-            }
+            let byte_slice = std::slice::from_raw_parts(
+                data.as_ptr() as *const u8,
+                data.len() * mem::size_of::<T>(),
+            );
+
+            let vb = gl.create_buffer().expect("Cannot create buffer");
+            gl.bind_buffer(glow::ARRAY_BUFFER, Some(vb));
+            gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, byte_slice, glow::STATIC_DRAW);
+
+            return vb;
+        };
+    }
+}
+
+pub trait BindBuffer {
+    fn bind(&self, gl: &glow::Context);
+}
+
+impl BindBuffer for NativeBuffer {
+    fn bind(&self, gl: &glow::Context) {
+        unsafe {
+            gl.bind_buffer(glow::ARRAY_BUFFER, Some(*self));
         }
     }
 }
