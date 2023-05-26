@@ -3,7 +3,6 @@
 //create from layout and buffer
 use glow::*;
 use crate::vertex_attribute::*;
-use crate::vertex_buffer::*;
 
 pub trait CreateFromLayout {
     fn new(gl: &::glow::Context, layout: &Vec<VertexAttribute>) -> NativeVertexArray;
@@ -17,6 +16,7 @@ impl CreateFromLayout for NativeVertexArray {
             gl.enable_vertex_attrib_array(0);
             for (i, attribute) in layout.iter().enumerate() {
                 gl.vertex_attrib_pointer_f32(i as u32, attribute.size, attribute.dtype, false, layout.stride(), attribute.offset);
+                gl.enable_vertex_attrib_array(i as u32)
             }
 
             return va;

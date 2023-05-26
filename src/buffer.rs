@@ -2,11 +2,11 @@ use glow::*;
 use std::mem;
 
 pub trait CreateFromData<T> {
-    fn new(gl: &glow::Context, data: &[T]) -> Self;
+    fn new(gl: &glow::Context, data: &[T], target: u32) -> Self;
 }
 
 impl<T: Copy> CreateFromData<T> for NativeBuffer {
-    fn new(gl: &glow::Context, data: &[T]) -> Self {
+    fn new(gl: &glow::Context, data: &[T], target: u32) -> Self {
         // First, we need to get a pointer to the raw bytes of the data.
         unsafe {
             let byte_slice = std::slice::from_raw_parts(
@@ -15,8 +15,8 @@ impl<T: Copy> CreateFromData<T> for NativeBuffer {
             );
 
             let vb = gl.create_buffer().expect("Cannot create buffer");
-            gl.bind_buffer(glow::ARRAY_BUFFER, Some(vb));
-            gl.buffer_data_u8_slice(glow::ARRAY_BUFFER, byte_slice, glow::STATIC_DRAW);
+            gl.bind_buffer(target, Some(vb));
+            gl.buffer_data_u8_slice(target, byte_slice, glow::STATIC_DRAW);
 
             return vb;
         };
@@ -24,13 +24,13 @@ impl<T: Copy> CreateFromData<T> for NativeBuffer {
 }
 
 pub trait BindBuffer {
-    fn bind(&self, gl: &glow::Context);
+    fn bind(&self, gl: &glow::Context, target: u32);
 }
 
 impl BindBuffer for NativeBuffer {
-    fn bind(&self, gl: &glow::Context) {
+    fn bind(&self, gl: &glow::Context, target: u32) {
         unsafe {
-            gl.bind_buffer(glow::ARRAY_BUFFER, Some(*self));
+            gl.bind_buffer(target, Some(*self));
         }
     }
 }
