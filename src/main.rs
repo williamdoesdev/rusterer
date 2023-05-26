@@ -39,7 +39,7 @@ fn main() {
     //     0.5f32, 0.5f32];
     let vertex_buffer = NativeBuffer::new(&gl, &vertices, glow::ARRAY_BUFFER);
 
-    let indices: [u32; 6] = [0, 1, 2, 0, 2, 3];
+    let indices: [u32; 6] = [0, 1, 2, 2, 3, 0];
     let index_buffer = NativeBuffer::new(&gl, &indices, glow::ELEMENT_ARRAY_BUFFER);
 
     let mut layout = Vec::<VertexAttribute>::new();

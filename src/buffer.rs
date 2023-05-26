@@ -14,11 +14,11 @@ impl<T: Copy> CreateFromData<T> for NativeBuffer {
                 data.len() * mem::size_of::<T>(),
             );
 
-            let vb = gl.create_buffer().expect("Cannot create buffer");
-            gl.bind_buffer(target, Some(vb));
+            let buffer = gl.create_buffer().expect("Cannot create buffer");
+            gl.bind_buffer(target, Some(buffer));
             gl.buffer_data_u8_slice(target, byte_slice, glow::STATIC_DRAW);
 
-            return vb;
+            return buffer;
         };
     }
 }
