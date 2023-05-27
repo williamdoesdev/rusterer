@@ -1,18 +1,21 @@
-use::std::fs;
 use::glow::*;
 
 mod sdl2_context;
 use sdl2_context::*;
 mod shader_program;
 use shader_program::*;
-mod buffer;
-use buffer::*;
 mod vertex_attribute;
 use vertex_attribute::*;
 mod vertex_array;
 use vertex_array::*;
 mod uniform;
 use uniform::*;
+mod renderer;
+use renderer::*;
+mod vertex_buffer;
+use vertex_buffer::*;
+mod index_buffer;
+use index_buffer::*;
 
 fn main() {
     unsafe {
@@ -33,14 +36,12 @@ fn main() {
         0.5f32, -0.5f32, 
         0.5f32, 0.5f32, 
         -0.5f32, 0.5f32];
-    // let vertices = [
-    //     -0.5f32, -0.5f32, 
-    //     0.5f32, -0.5f32, 
-    //     0.5f32, 0.5f32];
-    let vertex_buffer = NativeBuffer::new(&gl, &vertices, glow::ARRAY_BUFFER);
+    // let vertex_buffer = NativeBuffer::new(&gl, &vertices, glow::ARRAY_BUFFER);
+    let vertex_buffer = VertexBuffer::new(&gl, &vertices);
 
     let indices: [u32; 6] = [0, 1, 2, 2, 3, 0];
-    let index_buffer = NativeBuffer::new(&gl, &indices, glow::ELEMENT_ARRAY_BUFFER);
+    // let index_buffer = NativeBuffer::new(&gl, &indices, glow::ELEMENT_ARRAY_BUFFER);
+    let index_buffer = IndexBuffer::new(&gl, &indices);
 
     let mut layout = Vec::<VertexAttribute>::new();
     layout.push_attribute::<f32>(2);
@@ -51,7 +52,9 @@ fn main() {
     let uniform = NativeUniform::new(&gl, program, "uColor");
     uniform.set([0.25, 1.0, 1.0, 1.0]);
 
-    gl.clear_color(0.1, 0.2, 0.3, 1.0);
+    gl.clear_color(0.0, 0.0, 0.0, 1.0);
+
+    let renderer = Renderer::new(&gl);
 
     'render: loop {
         {
@@ -62,18 +65,16 @@ fn main() {
             }
         }
 
-        gl.clear(glow::COLOR_BUFFER_BIT);
-        // gl.draw_arrays(glow::TRIANGLES, 0, 3);
-        gl.draw_elements(glow::TRIANGLES, 6, glow::UNSIGNED_INT, 0);
+        // gl.clear(glow::COLOR_BUFFER_BIT);
+        index_buffer.bind();
+        renderer.draw(&vertex_buffer, &vertex_array, &index_buffer, &program);
         window.gl_swap_window();
     }
 
-    println!("{}", gl.get_error());
+    println!("glError: {}", gl.get_error());
 
     // Clean up
     gl.delete_program(program);
     gl.delete_vertex_array(vertex_array);
-    gl.delete_buffer(vertex_buffer);
-    gl.delete_buffer(index_buffer);
     }
 }

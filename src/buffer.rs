@@ -1,13 +1,14 @@
 use glow::*;
 use std::mem;
+use core::fmt::Debug;
 
 pub trait CreateFromData<T> {
     fn new(gl: &glow::Context, data: &[T], target: u32) -> Self;
 }
 
-impl<T: Copy> CreateFromData<T> for NativeBuffer {
+impl<T: Copy + Debug> CreateFromData<T> for NativeBuffer {
     fn new(gl: &glow::Context, data: &[T], target: u32) -> Self {
-        // First, we need to get a pointer to the raw bytes of the data.
+
         unsafe {
             let byte_slice = std::slice::from_raw_parts(
                 data.as_ptr() as *const u8,
@@ -23,14 +24,20 @@ impl<T: Copy> CreateFromData<T> for NativeBuffer {
     }
 }
 
-pub trait BindBuffer {
+pub trait IsBuffer {
     fn bind(&self, gl: &glow::Context, target: u32);
+
+    fn get_len(&self);
 }
 
-impl BindBuffer for NativeBuffer {
+impl IsBuffer for NativeBuffer {
     fn bind(&self, gl: &glow::Context, target: u32) {
         unsafe {
             gl.bind_buffer(target, Some(*self));
         }
+    }
+
+    fn get_len(&self) {
+        
     }
 }
