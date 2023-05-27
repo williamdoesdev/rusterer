@@ -36,11 +36,9 @@ fn main() {
         0.5f32, -0.5f32, 
         0.5f32, 0.5f32, 
         -0.5f32, 0.5f32];
-    // let vertex_buffer = NativeBuffer::new(&gl, &vertices, glow::ARRAY_BUFFER);
     let vertex_buffer = VertexBuffer::new(&gl, &vertices);
 
     let indices: [u32; 6] = [0, 1, 2, 2, 3, 0];
-    // let index_buffer = NativeBuffer::new(&gl, &indices, glow::ELEMENT_ARRAY_BUFFER);
     let index_buffer = IndexBuffer::new(&gl, &indices);
 
     let mut layout = Vec::<VertexAttribute>::new();
@@ -49,7 +47,7 @@ fn main() {
     let vertex_array = NativeVertexArray::new(&gl, &layout);
     vertex_array.bind(&gl);
 
-    let uniform = NativeUniform::new(&gl, program, "uColor");
+    let uniform = Uniform::new(&gl, program, "uColor");
     uniform.set([0.25, 1.0, 1.0, 1.0]);
 
     gl.clear_color(0.0, 0.0, 0.0, 1.0);
@@ -65,15 +63,12 @@ fn main() {
             }
         }
 
-        // gl.clear(glow::COLOR_BUFFER_BIT);
-        index_buffer.bind();
         renderer.draw(&vertex_buffer, &vertex_array, &index_buffer, &program);
         window.gl_swap_window();
     }
 
     println!("glError: {}", gl.get_error());
 
-    // Clean up
     gl.delete_program(program);
     gl.delete_vertex_array(vertex_array);
     }
