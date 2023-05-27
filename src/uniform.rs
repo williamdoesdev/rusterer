@@ -1,5 +1,7 @@
 use glow::*;
 
+use glam::*;
+
 pub struct Uniform<'a> {
     gl: &'a glow::Context,
     location: Option<glow::UniformLocation>,
@@ -41,10 +43,28 @@ impl IsUniform for i32 {
     }
 }
 
+// Arrays
+
 impl IsUniform for [f32; 4] {
     fn set_uniform(self, gl: &glow::Context, location: Option<&glow::UniformLocation>) {
         unsafe {
             gl.uniform_4_f32_slice(location, &self);
+        }
+    }
+}
+
+// Matrices
+
+impl IsUniform for Mat4 {
+    fn set_uniform(self, gl: &glow::Context, location: Option<&glow::UniformLocation>) {
+        unsafe {
+            println!("mat4: {}", self);
+            println!("to_cols_array(): ");
+            for item in self.to_cols_array() {
+                print!("{} ", item)
+            }
+            println!();
+            gl.uniform_matrix_4_f32_slice(location, true, &self.to_cols_array());
         }
     }
 }

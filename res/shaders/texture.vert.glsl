@@ -5,8 +5,10 @@ layout(location = 1) in vec2 texCoord;
 
 out vec2 vTexCoord;
 
+uniform mat4 uMVPMatrix;
+
 void main()
 {
-    gl_Position = position;
+    gl_Position = uMVPMatrix * position;
     vTexCoord = texCoord;
 }

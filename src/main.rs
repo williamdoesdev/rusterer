@@ -19,6 +19,8 @@ use index_buffer::*;
 mod texture;
 use texture::*;
 
+use glam::*;
+
 fn main() {
     unsafe {
 
@@ -29,7 +31,7 @@ fn main() {
     ("res/shaders/texture.frag.glsl", glow::FRAGMENT_SHADER),
     ];
 
-    let texture = Texture2D::new(&gl, "res/test.png");
+    let texture = Texture2D::new(&gl, "res/test2.png");
     texture.bind(0);
 
     let program = NativeProgram::new_from_files(&gl, shaders);
@@ -57,6 +59,11 @@ fn main() {
 
     let slot_uniform = Uniform::new(&gl, program, "uTextureSlot");
     slot_uniform.set(0);
+
+    let proj = Mat4::orthographic_rh_gl(-2.0, 2.0, -0.5, 0.5, -1.0, 1.0);
+
+    let mvp_uniform = Uniform::new(&gl, program, "uMVPMatrix");
+    mvp_uniform.set(proj);
 
     gl.clear_color(0.0, 0.0, 0.0, 1.0);
 

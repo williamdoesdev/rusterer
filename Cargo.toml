@@ -19,3 +19,6 @@ version = "*"
 
 [dependencies.image]
 version = "*"
+
+[dependencies.glam]
+version = "*"

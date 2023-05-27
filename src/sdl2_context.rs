@@ -12,7 +12,7 @@ pub fn create_sdl2_context() -> (
         gl_attr.set_context_version(3, 3);
         gl_attr.set_context_flags().forward_compatible().set();
         let window = video
-            .window("Hello triangle!", 1024, 769)
+            .window("Rusterer", 1600, 400)
             .opengl()
             .resizable()
             .build()
