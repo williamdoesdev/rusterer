@@ -33,6 +33,14 @@ impl IsUniform for f32 {
     }
 }
 
+impl IsUniform for i32 {
+    fn set_uniform(self, gl: &glow::Context, location: Option<&glow::UniformLocation>) {
+        unsafe {
+            gl.uniform_1_i32(location, self);
+        }
+    }
+}
+
 impl IsUniform for [f32; 4] {
     fn set_uniform(self, gl: &glow::Context, location: Option<&glow::UniformLocation>) {
         unsafe {

@@ -16,6 +16,8 @@ mod vertex_buffer;
 use vertex_buffer::*;
 mod index_buffer;
 use index_buffer::*;
+mod texture;
+use texture::*;
 
 fn main() {
     unsafe {
@@ -23,32 +25,38 @@ fn main() {
     let (gl, window, mut events_loop, _context) = create_sdl2_context();
         
     let shaders = vec![
-    ("res/shaders/triangle.vert.glsl", glow::VERTEX_SHADER),
-    ("res/shaders/triangle.frag.glsl", glow::FRAGMENT_SHADER),
+    ("res/shaders/texture.vert.glsl", glow::VERTEX_SHADER),
+    ("res/shaders/texture.frag.glsl", glow::FRAGMENT_SHADER),
     ];
 
+    let texture = Texture2D::new(&gl, "res/test.png");
+    texture.bind(0);
 
     let program = NativeProgram::new_from_files(&gl, shaders);
     program.bind(&gl);
 
     let vertices = [
-        -0.5f32, -0.5f32, 
-        0.5f32, -0.5f32, 
-        0.5f32, 0.5f32, 
-        -0.5f32, 0.5f32];
+        -0.5f32, -0.5f32, 0.0, 0.0,
+        0.5f32, -0.5f32, 1.0, 0.0,
+        0.5f32, 0.5f32, 1.0, 1.0, 
+        -0.5f32, 0.5f32, 0.0, 1.0
+        ];
     let vertex_buffer = VertexBuffer::new(&gl, &vertices);
 
     let indices: [u32; 6] = [0, 1, 2, 2, 3, 0];
     let index_buffer = IndexBuffer::new(&gl, &indices);
 
     let mut layout = Vec::<VertexAttribute>::new();
-    layout.push_attribute::<f32>(2);
+    layout.push_attribute::<f32>(2).push_attribute::<f32>(2);
 
     let vertex_array = NativeVertexArray::new(&gl, &layout);
     vertex_array.bind(&gl);
 
     let uniform = Uniform::new(&gl, program, "uColor");
     uniform.set([0.25, 1.0, 1.0, 1.0]);
+
+    let slot_uniform = Uniform::new(&gl, program, "uTextureSlot");
+    slot_uniform.set(0);
 
     gl.clear_color(0.0, 0.0, 0.0, 1.0);
 

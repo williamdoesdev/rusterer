@@ -16,3 +16,6 @@ version = "*"
 
 [dependencies.env_logger]
 version = "*"
+
+[dependencies.image]
+version = "*"
