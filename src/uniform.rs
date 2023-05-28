@@ -58,13 +58,7 @@ impl IsUniform for [f32; 4] {
 impl IsUniform for Mat4 {
     fn set_uniform(self, gl: &glow::Context, location: Option<&glow::UniformLocation>) {
         unsafe {
-            println!("mat4: {}", self);
-            println!("to_cols_array(): ");
-            for item in self.to_cols_array() {
-                print!("{} ", item)
-            }
-            println!();
-            gl.uniform_matrix_4_f32_slice(location, true, &self.to_cols_array());
+            gl.uniform_matrix_4_f32_slice(location, false, &self.to_cols_array());
         }
     }
 }

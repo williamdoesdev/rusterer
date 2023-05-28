@@ -15,13 +15,18 @@ impl<'a> Renderer<'a> {
 
     pub fn draw<T: Copy, U: Copy>(&self, vb: &VertexBuffer<'_, T>, va: &glow::NativeVertexArray, ib: &IndexBuffer<'_, U>, program: &glow::NativeProgram){
         unsafe {
-            self.gl.clear(glow::COLOR_BUFFER_BIT);
             vb.bind();
             va.bind(self.gl);
             ib.bind();
             program.bind(self.gl);
 
             self.gl.draw_elements(glow::TRIANGLES, ib.len, glow::UNSIGNED_INT, 0);
+        }
+    }
+
+    pub fn clear(&self) {
+        unsafe{
+            self.gl.clear(glow::COLOR_BUFFER_BIT);
         }
     }
 }

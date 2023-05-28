@@ -5,20 +5,13 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies.glow]
-version = "*"
-
-[dependencies.sdl2]
-version = "*"
-
-[dependencies.log]
-version = "*"
-
-[dependencies.env_logger]
-version = "*"
-
-[dependencies.image]
-version = "*"
-
-[dependencies.glam]
-version = "*"
+[dependencies]
+glow = "0.12.1"
+sdl2 = "0.35.2"
+log = "0.4.18"
+env_logger = "0.10.0"
+image = "0.24.6"
+glam = "0.24.0"
+egui = "0.15.0"
+egui_glow = "0.22.0"
+rand = "0.8.5"
